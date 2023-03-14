@@ -44,3 +44,32 @@ class FrogUnification extends FunSuite:
 
     // execute(initial, ALL)
   }
+
+
+class Socrates extends FunSuite:
+  test("basic") {
+    val TV = StringLiteral("TruthValue")
+    val Human = StringLiteral("Human")
+
+    val initial = State(
+      Space(Expr(StringLiteral("And"), Expr(Human, StringLiteral("Socrates")), Expr(Human, StringLiteral("Sam")))),
+      Space(
+        Expr(===, Expr(Human, StringLiteral("Socrates")), Expr(TV, DoubleLiteral(0.9))),
+        Expr(===, Expr(Human, StringLiteral("Sam")), Expr(TV, DoubleLiteral(0.7))),
+
+        Expr(===, Expr(StringLiteral("And"), Expr(TV, Var("p1")), Expr(TV, Var("p2"))),
+          Expr(TV, Expr(Mul, Var("p1"), Var("p2")))),
+      ),
+      Space(),
+      Space()
+    )
+
+    lazy val resulting = State(
+      Space(),
+      initial.k,
+      Space(),
+      Space(Expr(TV, DoubleLiteral(0.9 * 0.7)))
+    )
+
+//    assert(execute(initial, ALL) == resulting)
+  }
