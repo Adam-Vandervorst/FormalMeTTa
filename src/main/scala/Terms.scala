@@ -4,7 +4,7 @@ import scala.collection.MultiSet
 
 
 case class Space(ts: MultiSet[Term])
-object Space { def apply(t: Term, ts: Term*) = new Space(MultiSet.from(t +: ts)) }
+object Space { def apply(ts: Term*) = new Space(MultiSet.from(ts)) } // can't be empty in doc
 
 sealed trait Term
 

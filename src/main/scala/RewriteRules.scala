@@ -194,3 +194,20 @@ case object OUTPUT extends RewriteRule:
 
     val (Some(u), w_) = w.partitionFirst(u => insensitive(u, k))
     State(i, k, w_, Space(u) ++ o)
+
+
+val BASE: Seq[RewriteRule] = Seq(
+  QUERY,
+  CHAIN,
+  TRANSFORM,
+  OUTPUT,
+)
+
+val GROUNDING: Seq[RewriteRule] = Seq(
+  BOOLMUL1,
+  BOOLMUL2,
+  DOUBLEMUL1,
+  DOUBLEMUL2,
+)
+
+val ALL: Seq[RewriteRule] = BASE ++ GROUNDING

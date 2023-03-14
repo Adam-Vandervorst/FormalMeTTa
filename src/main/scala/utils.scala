@@ -12,6 +12,14 @@ def substitute(t: Term, k: Knowledge): Term = t match
   case Var(name) => k.lookup(name).fold(t)(substitute(_, k))
   case _ => t
 
+def execute(initial: State, rules: Seq[RewriteRule]): State =
+  var state = initial
+  while true do
+    rules.find(_.isDefinedAt(state)) match
+      case Some(rule) => state = rule(state)
+      case None => return state
+  throw IllegalStateException()
+
 extension (s: Space)
   def ++ (os: Space): Space = Space(s.ts concat os.ts)
 
