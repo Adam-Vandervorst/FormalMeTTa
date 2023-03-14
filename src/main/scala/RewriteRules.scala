@@ -107,8 +107,8 @@ case object BOOLMUL1 extends RewriteRule:
     }
 
   def apply(x: State): State =
-    // State({(+ b1 b2)} ++ i, k, w, o) -->
-    // State(i, k, w, {b1 | b2} ++ o)
+    // State({(Mul b1 b2)} ++ i, k, w, o) -->
+    // State(i, k, w, {b1 & b2} ++ o)
     val State(i, k, w, o) = x
 
     val (Some(Expr(Vector(_, BoolLiteral(b1), BoolLiteral(b2)))), i_) = i.partitionFirst {
@@ -120,7 +120,7 @@ case object BOOLMUL1 extends RewriteRule:
 
 case object BOOLMUL2 extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
-    // w = {(* b1 b2)} ++ w'
+    // w = {(Mul b1 b2)} ++ w'
     val State(i, k, w, o) = x
     w.ts.exists {
       case Expr(Vector(`Mul`, _: BoolLiteral, _: BoolLiteral)) => true
@@ -137,6 +137,48 @@ case object BOOLMUL2 extends RewriteRule:
       case _ => false
     }
     State(i, k, w_, Space(BoolLiteral(b1 & b2)) ++ o)
+
+
+case object DOUBLEMUL1 extends RewriteRule:
+  def isDefinedAt(x: State): Boolean =
+    // -
+    val State(i, k, w, o) = x
+    i.ts.exists {
+      case Expr(Vector(`Mul`, _: DoubleLiteral, _: DoubleLiteral)) => true
+      case _ => false
+    }
+
+  def apply(x: State): State =
+    // State({(Mul d1 d2)} ++ i, k, w, o) -->
+    // State(i, k, w, {d1 * d2} ++ o)
+    val State(i, k, w, o) = x
+
+    val (Some(Expr(Vector(_, DoubleLiteral(d1), DoubleLiteral(d2)))), i_) = i.partitionFirst {
+      case Expr(Vector(`Mul`, _: DoubleLiteral, _: DoubleLiteral)) => true
+      case _ => false
+    }
+    State(i_, k, w, Space(DoubleLiteral(d1 * d2)) ++ o)
+
+
+case object DOUBLEMUL2 extends RewriteRule:
+  def isDefinedAt(x: State): Boolean =
+    // w = {(Mul b1 b2)} ++ w'
+    val State(i, k, w, o) = x
+    w.ts.exists {
+      case Expr(Vector(`Mul`, _: DoubleLiteral, _: DoubleLiteral)) => true
+      case _ => false
+    }
+
+  def apply(x: State): State =
+    // State(i, k, w, o) -->
+    // State(i, k, w', {b1 * b2} ++ o)
+    val State(i, k, w, o) = x
+
+    val (Some(Expr(Vector(_, DoubleLiteral(d1), DoubleLiteral(d2)))), w_) = w.partitionFirst {
+      case Expr(Vector(`Mul`, _: DoubleLiteral, _: DoubleLiteral)) => true
+      case _ => false
+    }
+    State(i, k, w_, Space(DoubleLiteral(d1 * d2)) ++ o)
 
 
 case object OUTPUT extends RewriteRule:

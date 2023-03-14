@@ -26,6 +26,7 @@ case object remAtom extends Builtin
 sealed trait Ground extends Atom
 case object Mul extends Ground  // not in doc
 case class BoolLiteral(value: Boolean) extends Ground
+case class DoubleLiteral(value: Double) extends Ground  // not in doc
 case class LongLiteral(value: Long) extends Ground
 case class StringLiteral(value: String) extends Ground
 case class URILiteral(value: URI) extends Ground
