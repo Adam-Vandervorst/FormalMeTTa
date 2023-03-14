@@ -97,6 +97,48 @@ case object ADDATOM1 extends RewriteRule:
     State(i_, k, Space(t) ++ w, Space(??? : Term) ++ o)
 
 
+case object BOOLMUL1 extends RewriteRule:
+  def isDefinedAt(x: State): Boolean =
+    // -
+    val State(i, k, w, o) = x
+    i.ts.exists {
+      case Expr(Vector(`Mul`, _: BoolLiteral, _: BoolLiteral)) => true
+      case _ => false
+    }
+
+  def apply(x: State): State =
+    // State({(+ b1 b2)} ++ i, k, w, o) -->
+    // State(i, k, w, {b1 | b2} ++ o)
+    val State(i, k, w, o) = x
+
+    val (Some(Expr(Vector(_, BoolLiteral(b1), BoolLiteral(b2)))), i_) = i.partitionFirst {
+      case Expr(Vector(`Mul`, _: BoolLiteral, _: BoolLiteral)) => true
+      case _ => false
+    }
+    State(i_, k, w, Space(BoolLiteral(b1 & b2)) ++ o)
+
+
+case object BOOLMUL2 extends RewriteRule:
+  def isDefinedAt(x: State): Boolean =
+    // w = {(* b1 b2)} ++ w'
+    val State(i, k, w, o) = x
+    w.ts.exists {
+      case Expr(Vector(`Mul`, _: BoolLiteral, _: BoolLiteral)) => true
+      case _ => false
+    }
+
+  def apply(x: State): State =
+    // State(i, k, w, o) -->
+    // State(i, k, w', {b1 & b2} ++ o)
+    val State(i, k, w, o) = x
+
+    val (Some(Expr(Vector(_, BoolLiteral(b1), BoolLiteral(b2)))), w_) = w.partitionFirst {
+      case Expr(Vector(`Mul`, _: BoolLiteral, _: BoolLiteral)) => true
+      case _ => false
+    }
+    State(i, k, w_, Space(BoolLiteral(b1 & b2)) ++ o)
+
+
 case object OUTPUT extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // insensitive(u, k)
