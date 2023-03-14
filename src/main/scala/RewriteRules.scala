@@ -76,6 +76,27 @@ case object TRANSFORM extends RewriteRule:
     State(i_, k, applied ++ w, o)
 
 
+case object ADDATOM1 extends RewriteRule:
+  def isDefinedAt(x: State): Boolean =
+    // -
+    val State(i, k, w, o) = x
+    i.ts.exists{
+      case Expr(Vector(`addAtom`, _)) => true
+      case _ => false
+    }
+
+  def apply(x: State): State =
+    // State({(addAtom t)} ++ i, k, w, o) -->
+    // State(i, {t} ++ k, w, o)
+    val State(i, k, w, o) = x
+
+    val (Some(Expr(Vector(_, t))), i_) = i.partitionFirst{
+      case Expr(Vector(`addAtom`, _)) => true
+      case _ => false
+    }
+    State(i_, k, Space(t) ++ w, Space(??? : Term) ++ o)
+
+
 case object OUTPUT extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // insensitive(u, k)
