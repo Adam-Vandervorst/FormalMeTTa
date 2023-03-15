@@ -87,7 +87,7 @@ case object ADDATOM1 extends RewriteRule:
 
   def apply(x: State): State =
     // State({(addAtom t)} ++ i, k, w, o) -->
-    // State(i, {t} ++ k, w, o)
+    // State(i, {t} ++ k, w, {()} ++ o)
     val State(i, k, w, o) = x
 
     val (Some(Expr(Vector(_, t))), i_) = i.partitionFirst{

@@ -5,7 +5,7 @@ import scala.collection.MultiSet
 
 case class Space(ts: MultiSet[Term])
 object Space:
-  def apply(ts: Term*) = new Space(MultiSet.from(ts)) // can't be empty in doc
+  def apply(ts: Term*) = new Space(MultiSet.from(ts))
 
 sealed trait Term
 
@@ -19,8 +19,7 @@ sealed trait Atom extends Term
 case class Var(name: String) extends Atom
 
 sealed trait Builtin extends Atom
-case object transform extends Builtin  // not in doc
-// case object ::= extends Builtin  // In doc but unused
+case object transform extends Builtin
 case object === extends Builtin
 case object addAtom extends Builtin
 case object remAtom extends Builtin
@@ -28,7 +27,7 @@ case object remAtom extends Builtin
 sealed trait Ground extends Atom
 case object Mul extends Ground  // not in doc
 case class BoolLiteral(value: Boolean) extends Ground
-case class DoubleLiteral(value: Double) extends Ground  // not in doc
+case class DoubleLiteral(value: Double) extends Ground
 case class LongLiteral(value: Long) extends Ground
 case class StringLiteral(value: String) extends Ground
 case class URILiteral(value: URI) extends Ground
