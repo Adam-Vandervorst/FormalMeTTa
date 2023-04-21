@@ -2,6 +2,21 @@ case class State(i: Space, k: Space, w: Space, o: Space)
 
 sealed trait RewriteRule extends PartialFunction[State, State]
 
+abstract class Context:
+  def apply(t: Term): Term
+  def unapply(t: Term): Option[Term]
+
+
+object Context:
+  def fromTerm(lens: Term): Context = new Context:
+    override def apply(t: Term): Term =
+      substitute(lens, Knowledge.empty.modBind("HOLE", t))
+
+    override def unapply(t: Term): Option[Term] =
+      Unification.unify(lens)(t).flatMap(_.lookup("HOLE"))
+
+  val HOLE: Var = Var("HOLE")
+
 
 case object QUERY extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
@@ -20,6 +35,21 @@ case object QUERY extends RewriteRule:
     val applied = new Space(k.ts.collect{
       case Expr(Vector(`===`, ti, ui)) if !disjoint(t_, ti) =>
         substitute(ui, (t_ unify ti).get)
+    })
+    State(i_, k, applied ++ w, o)
+
+case class Query(K: Context) extends RewriteRule:
+  def isDefinedAt(x: State): Boolean =
+    val State(i, k, w, o) = x
+    i.ts.exists{ case K(t_) => !insensitive(t_, k); case _ => false }
+
+  def apply(x: State): State =
+    val State(i, k, w, o) = x
+
+    val (Some(K(t_)), i_) = i.partitionFirst{ case K(x) => !insensitive(x, k); case _ => false }
+    val applied = new Space(k.ts.collect{
+      case Expr(Vector(`===`, ti, ui)) if !disjoint(t_, ti) =>
+        K(substitute(ui, (t_ unify ti).get))
     })
     State(i_, k, applied ++ w, o)
 

@@ -22,6 +22,29 @@ class QueryTest extends FunSuite:
     assert(QUERY.isDefinedAt(state1))
     assert(QUERY(state1) == state1_output_option1)
   }
+
+  test("context") {
+    val QUERY = Query(Context.fromTerm(Expr(StringLiteral("Wrapper"), Context.HOLE)))
+
+    val state1 = State(
+      Space(StringLiteral("Input invariant 1"), Expr(StringLiteral("Wrapper"), Expr(StringLiteral("Some"), StringLiteral("To process 1")))),
+      Space(StringLiteral("Knowledge invariant 1"), Expr(===, Expr(StringLiteral("Some"), Var("x")), Expr(StringLiteral("Simulated output"), Var("x")))),
+      Space(StringLiteral("Work invariant 1"), Expr(StringLiteral("Some"), StringLiteral("Work invariant 2"))),
+      Space(StringLiteral("Output invariant 1"), Expr(StringLiteral("Some"), StringLiteral("Output invariant 2"))),
+    )
+
+    val state1_output_option1 = State(
+      Space(StringLiteral("Input invariant 1")),
+      state1.k,
+      Space(StringLiteral("Work invariant 1"), Expr(StringLiteral("Some"), StringLiteral("Work invariant 2")),
+        Expr(StringLiteral("Wrapper"), Expr(StringLiteral("Simulated output"), StringLiteral("To process 1")))),
+      state1.o
+    )
+
+
+    assert(QUERY.isDefinedAt(state1))
+    assert(QUERY(state1) == state1_output_option1)
+  }
 end QueryTest
 
 
