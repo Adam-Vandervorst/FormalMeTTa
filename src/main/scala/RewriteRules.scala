@@ -203,6 +203,11 @@ val BASE: Seq[RewriteRule] = Seq(
   OUTPUT,
 )
 
+val CONTEXT_FREE: Seq[RewriteRule] = Seq(
+  TRANSFORM,
+  OUTPUT
+)
+
 val GROUNDING: Seq[RewriteRule] = Seq(
   BOOLMUL1,
   BOOLMUL2,

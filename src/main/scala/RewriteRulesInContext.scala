@@ -46,6 +46,32 @@ case class Chain(K: Context) extends RewriteRule:
     })
     State(i, k, applied ++ w_, o)
 
+
+case class DoubleMul2(K: Context) extends RewriteRule:
+  def isDefinedAt(x: State): Boolean =
+    val State(i, k, w, o) = x
+    w.ts.exists {
+      case K(Expr(Vector(`Mul`, _: DoubleLiteral, _: DoubleLiteral))) => true
+      case _ => false
+    }
+
+  def apply(x: State): State =
+    val State(i, k, w, o) = x
+
+    val (Some(K(Expr(Vector(_, DoubleLiteral(d1), DoubleLiteral(d2))))), w_) = w.partitionFirst {
+      case K(Expr(Vector(`Mul`, _: DoubleLiteral, _: DoubleLiteral))) => true
+      case _ => false
+    }
+    State(i, k, w_, Space(K(DoubleLiteral(d1 * d2))) ++ o)
+
+
+def ALL_IN_CONTEXT(state: State): Iterable[RewriteRule] =
+  state.i.possibleContexts.map(Query).toVector ++
+  state.w.possibleContexts.map(Chain).toVector ++
+  state.w.possibleContexts.map(DoubleMul2).toVector ++
+  GROUNDING ++
+  CONTEXT_FREE
+
 /*
 case object TRANSFORM extends RewriteRule:
   def isDefinedAt(x: State): Boolean =

@@ -71,5 +71,5 @@ class Socrates extends FunSuite:
       Space(Expr(TV, DoubleLiteral(0.9 * 0.7)))
     )
 
-//    assert(execute(initial, ALL) == resulting)
+    assertEquals(executeWithContext(initial, ALL_IN_CONTEXT), resulting)
   }

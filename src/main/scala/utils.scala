@@ -17,10 +17,18 @@ def holes(t: Term): Set[Term] = Set(Context.HOLE) union (t match
     Expr(for (ot, i) <- ts.zipWithIndex yield if i == j then t_ else ot)
   case _ => Set())
 
-def execute(initial: State, rules: Seq[RewriteRule]): State =
+def execute(initial: State, rules: Iterable[RewriteRule]): State =
   var state = initial
   while true do
     rules.find(_.isDefinedAt(state)) match
+      case Some(rule) => state = rule(state)
+      case None => return state
+  throw IllegalStateException()
+
+def executeWithContext(initial: State, contextRules: State => Iterable[RewriteRule]): State =
+  var state = initial
+  while true do
+    contextRules(state).find(_.isDefinedAt(state)) match
       case Some(rule) => state = rule(state)
       case None => return state
   throw IllegalStateException()
@@ -41,6 +49,10 @@ extension (s: Space)
     for t <- s.ts.toSet; lens <- holes(t)
       yield Context.fromTerm(lens)
 
+  def view: String =
+    if s.ts.isEmpty then "/\n"
+    else s.ts.map(_.pretty).mkString("\n", "\n", "\n")
+
 extension (t: Term)
   def pretty: String = t match
     case Expr(ts) => ts.map(_.pretty).mkString("(", " ", ")")
@@ -57,3 +69,10 @@ extension (t: Term)
     case LongLiteral(value) => value.toString + "L" 
     case StringLiteral(value) => s"\"$value\"" 
     case URILiteral(value) => value.toString
+
+extension (s: State)
+  def overview: String =
+    "input: " + s.i.view +
+    "knowledge: " + s.k.view +
+    "working: " + s.w.view +
+    "output: " + s.o.view
