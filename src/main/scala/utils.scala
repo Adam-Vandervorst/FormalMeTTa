@@ -36,3 +36,24 @@ extension (s: Space)
     s.ts.find(p) match
       case Some(v) => (Some(v), Space(s.ts.filter(_ != v)))
       case None => (None, s)
+
+  def possibleContexts: Set[Context] =
+    for t <- s.ts.toSet; lens <- holes(t)
+      yield Context.fromTerm(lens)
+
+extension (t: Term)
+  def pretty: String = t match
+    case Expr(ts) => ts.map(_.pretty).mkString("(", " ", ")")
+    case Var(name) => s"$$$name"
+
+    case `transform` => "transform"
+    case `===` => "="
+    case `addAtom` => "addAtom"
+    case `remAtom` => "remAtom"
+
+    case Mul => "*"
+    case BoolLiteral(value) => value.toString
+    case DoubleLiteral(value) => value.toString + "D"
+    case LongLiteral(value) => value.toString + "L" 
+    case StringLiteral(value) => s"\"$value\"" 
+    case URILiteral(value) => value.toString

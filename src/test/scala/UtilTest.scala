@@ -19,3 +19,10 @@ class UtilTest extends FunSuite:
       Expr(Vector(HOLE, Expr(Vector(StringLiteral("a"), StringLiteral("b"), StringLiteral("c"))))),
     ))
   }
+
+  test("possible contexts") {
+    val s = Space(Expr(StringLiteral("Human"), StringLiteral("Elizabeth")),
+      Expr(StringLiteral("And"), Expr(StringLiteral("Human"), StringLiteral("Socrates")), Expr(StringLiteral("Human"), StringLiteral("Sam"))))
+
+    assert(s.possibleContexts.size == 11)
+  }
