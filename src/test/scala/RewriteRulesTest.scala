@@ -68,6 +68,26 @@ class ChainTest extends FunSuite:
     assert(CHAIN.isDefinedAt(state1))
     assert(CHAIN(state1) == state1_output_option1)
   }
+
+  test("auto redundant context") {
+    val state1 = State(
+      Space(StringLiteral("Input invariant 1"), Expr(StringLiteral("Some"), StringLiteral("Input invariant 2"))),
+      Space(StringLiteral("Knowledge invariant 1"), Expr(===, Expr(StringLiteral("Some"), Var("x")), Expr(StringLiteral("Simulated output"), Var("x")))),
+      Space(StringLiteral("Work invariant 1"), Expr(StringLiteral("Some"), StringLiteral("To process 1"))),
+      Space(StringLiteral("Output invariant 1"), Expr(StringLiteral("Some"), StringLiteral("Output invariant 2"))),
+    )
+
+    val state1_output_option1 = State(
+      state1.i,
+      state1.k,
+      Space(StringLiteral("Work invariant 1"), Expr(StringLiteral("Simulated output"), StringLiteral("To process 1"))),
+      state1.o
+    )
+
+    for K <- state1.w.possibleContexts
+        state <- Chain(K).unapply(state1) do
+      assert(state == state1_output_option1)
+  }
 end ChainTest
 
 

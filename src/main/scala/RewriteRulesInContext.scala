@@ -1,51 +1,52 @@
-case class State(i: Space, k: Space, w: Space, o: Space)
+abstract class Context:
+  def apply(t: Term): Term
+  def unapply(t: Term): Option[Term]
 
-trait RewriteRule extends PartialFunction[State, State]
+
+object Context:
+  def fromTerm(lens: Term): Context = new Context:
+    override def apply(t: Term): Term =
+      substitute(lens, Knowledge.empty.modBind("HOLE", t))
+
+    override def unapply(t: Term): Option[Term] =
+      Unification.unify(lens)(t).flatMap(_.lookup("HOLE"))
+
+  val HOLE: Var = Var("HOLE")
 
 
-case object QUERY extends RewriteRule:
+case class Query(K: Context) extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
-    // sigma_i = unify(t', t_i)
-    // k = S(L(===, t_1, u_1), ..., L(===, t_n, u_n)) ++ k'
-    // insensitive(t', k')
     val State(i, k, w, o) = x
-    i.ts.exists(t_ => !insensitive(t_, k))
+    i.ts.exists{ case K(t_) => !insensitive(t_, k); case _ => false }
 
   def apply(x: State): State =
-    // State({t'} ++ i, k, w, o) -->
-    // State(i, k, {u_1 sigma_1} ++ ... ++ {u_1 sigma_1} ++ w, o)
     val State(i, k, w, o) = x
 
-    val (Some(t_), i_) = i.partitionFirst(!insensitive(_, k))
+    val (Some(K(t_)), i_) = i.partitionFirst{ case K(t_) => !insensitive(t_, k); case _ => false }
     val applied = new Space(k.ts.collect{
       case Expr(Vector(`===`, ti, ui)) if !disjoint(t_, ti) =>
-        substitute(ui, (t_ unify ti).get)
+        K(substitute(ui, (t_ unify ti).get))
     })
     State(i_, k, applied ++ w, o)
 
 
-case object CHAIN extends RewriteRule:
+case class Chain(K: Context) extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
-    // sigma_i = unify(u, t_i)
-    // k = S(L(===, t_1, u_1), ..., L(===, t_n, u_n)) ++ k'
-    // insensitive(u, k')
     val State(i, k, w, o) = x
-    w.ts.exists(u => !insensitive(u, k))
+    w.ts.exists{ case K(u) => !insensitive(u, k); case _ => false }
 
 
   def apply(x: State): State =
-    // State(i, k, {u} ++ w, o) -->
-    // State(i, k, {u_1 sigma_1} ++ ... ++ {u_1 sigma_1} ++ w, o)
     val State(i, k, w, o) = x
 
-    val (Some(u), w_) = w.partitionFirst(u => !insensitive(u, k))
+    val (Some(K(u)), w_) = w.partitionFirst{ case K(u) => !insensitive(u, k); case _ => false }
     val applied = new Space(k.ts.collect {
       case Expr(Vector(`===`, ti, ui)) if !disjoint(u, ti) =>
-        substitute(ui, (u unify ti).get)
+        K(substitute(ui, (u unify ti).get))
     })
     State(i, k, applied ++ w_, o)
 
-
+/*
 case object TRANSFORM extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // sigma_i = unify(t, t_i)
@@ -194,20 +195,4 @@ case object OUTPUT extends RewriteRule:
 
     val (Some(u), w_) = w.partitionFirst(u => insensitive(u, k))
     State(i, k, w_, Space(u) ++ o)
-
-
-val BASE: Seq[RewriteRule] = Seq(
-  QUERY,
-  CHAIN,
-  TRANSFORM,
-  OUTPUT,
-)
-
-val GROUNDING: Seq[RewriteRule] = Seq(
-  BOOLMUL1,
-  BOOLMUL2,
-  DOUBLEMUL1,
-  DOUBLEMUL2,
-)
-
-val ALL: Seq[RewriteRule] = BASE ++ GROUNDING
+*/
