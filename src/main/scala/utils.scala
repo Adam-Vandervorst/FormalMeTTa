@@ -12,6 +12,11 @@ def substitute(t: Term, k: Knowledge): Term = t match
   case Var(name) => k.lookup(name).fold(t)(substitute(_, k))
   case _ => t
 
+def holes(t: Term): Set[Term] = Set(Context.HOLE) union (t match
+  case Expr(ts) => for (t, j) <- ts.zipWithIndex.toSet; t_ <- holes(t) yield
+    Expr(for (ot, i) <- ts.zipWithIndex yield if i == j then t_ else ot)
+  case _ => Set())
+
 def execute(initial: State, rules: Seq[RewriteRule]): State =
   var state = initial
   while true do
