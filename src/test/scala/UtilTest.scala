@@ -4,7 +4,7 @@ import munit.FunSuite
 
 class UtilTest extends FunSuite:
   test("holes") {
-    import Context.HOLE
+    import TContext.HOLE
     assertEquals(holes(Expr(StringLiteral("a"), StringLiteral("b"))), Set(
       Expr(HOLE, StringLiteral("b")),
       Expr(StringLiteral("a"), HOLE),
@@ -24,5 +24,5 @@ class UtilTest extends FunSuite:
     val s = Space(Expr(StringLiteral("Human"), StringLiteral("Elizabeth")),
       Expr(StringLiteral("And"), Expr(StringLiteral("Human"), StringLiteral("Socrates")), Expr(StringLiteral("Human"), StringLiteral("Sam"))))
 
-    assert(s.possibleContexts.size == 11)
+    assertEquals(s.possibleContexts.size, 10)
   }

@@ -24,7 +24,7 @@ class QueryTest extends FunSuite:
   }
 
   test("context") {
-    val QUERY = Query(Context.fromTerm(Expr(StringLiteral("Wrapper"), Context.HOLE)))
+    val QUERY = Query(TContext(Expr(StringLiteral("Wrapper"), TContext.HOLE)))
 
     val state1 = State(
       Space(StringLiteral("Input invariant 1"), Expr(StringLiteral("Wrapper"), Expr(StringLiteral("Some"), StringLiteral("To process 1")))),

@@ -42,7 +42,14 @@ class FrogUnification extends FunSuite:
       Space()
     )
 
-    // execute(initial, ALL)
+    val resulting = State(
+      Space(),
+      initial.k,
+      Space(),
+      Space(StringLiteral("Fritz"))
+    )
+
+    assertEquals(executeWithContext(initial, ALL_IN_CONTEXT), resulting)
   }
 
 

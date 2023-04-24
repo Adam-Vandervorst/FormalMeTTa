@@ -12,7 +12,7 @@ def substitute(t: Term, k: Knowledge): Term = t match
   case Var(name) => k.lookup(name).fold(t)(substitute(_, k))
   case _ => t
 
-def holes(t: Term): Set[Term] = Set(Context.HOLE) union (t match
+def holes(t: Term): Set[Term] = Set(TContext.HOLE) union (t match
   case Expr(ts) => for (t, j) <- ts.zipWithIndex.toSet; t_ <- holes(t) yield
     Expr(for (ot, i) <- ts.zipWithIndex yield if i == j then t_ else ot)
   case _ => Set())
@@ -28,6 +28,8 @@ def execute(initial: State, rules: Iterable[RewriteRule]): State =
 def executeWithContext(initial: State, contextRules: State => Iterable[RewriteRule]): State =
   var state = initial
   while true do
+    println()
+    println(state.overview)
     contextRules(state).find(_.isDefinedAt(state)) match
       case Some(rule) => state = rule(state)
       case None => return state
@@ -45,9 +47,9 @@ extension (s: Space)
       case Some(v) => (Some(v), Space(s.ts.filter(_ != v)))
       case None => (None, s)
 
-  def possibleContexts: Set[Context] =
+  def possibleContexts: Set[TContext] =
     for t <- s.ts.toSet; lens <- holes(t)
-      yield Context.fromTerm(lens)
+      yield TContext(lens)
 
   def view: String =
     if s.ts.isEmpty then "/\n"

@@ -3,14 +3,14 @@ abstract class Context:
   def unapply(t: Term): Option[Term]
 
 
-object Context:
-  def fromTerm(lens: Term): Context = new Context:
-    override def apply(t: Term): Term =
-      substitute(lens, Knowledge.empty.modBind("HOLE", t))
+case class TContext(lens: Term) extends Context:
+  override def apply(t: Term): Term =
+    substitute(lens, Knowledge.empty.modBind("HOLE", t))
 
-    override def unapply(t: Term): Option[Term] =
-      Unification.unify(lens)(t).flatMap(_.lookup("HOLE"))
+  override def unapply(t: Term): Option[Term] =
+    Unification.unify(lens)(t).flatMap(_.lookup("HOLE"))
 
+object TContext:
   val HOLE: Var = Var("HOLE")
 
 
@@ -25,7 +25,8 @@ case class Query(K: Context) extends RewriteRule:
     val (Some(K(t_)), i_) = i.partitionFirst{ case K(t_) => !insensitive(t_, k); case _ => false }
     val applied = new Space(k.ts.collect{
       case Expr(Vector(`===`, ti, ui)) if !disjoint(t_, ti) =>
-        K(substitute(ui, (t_ unify ti).get))
+        val bindings = (t_ unify ti).get
+        substitute(K(substitute(ui, bindings)), bindings)
     })
     State(i_, k, applied ++ w, o)
 
@@ -42,7 +43,8 @@ case class Chain(K: Context) extends RewriteRule:
     val (Some(K(u)), w_) = w.partitionFirst{ case K(u) => !insensitive(u, k); case _ => false }
     val applied = new Space(k.ts.collect {
       case Expr(Vector(`===`, ti, ui)) if !disjoint(u, ti) =>
-        K(substitute(ui, (u unify ti).get))
+        val bindings = (u unify ti).get
+        substitute(K(substitute(ui, bindings)), bindings)
     })
     State(i, k, applied ++ w_, o)
 
