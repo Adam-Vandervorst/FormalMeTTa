@@ -71,7 +71,6 @@ extension (t: Term)
     case DoubleLiteral(value) => value.toString + "D"
     case LongLiteral(value) => value.toString + "L" 
     case StringLiteral(value) => s"\"$value\"" 
-    case URILiteral(value) => value.toString
 
 extension (s: State)
   def overview: String =

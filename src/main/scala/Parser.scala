@@ -1,25 +1,33 @@
 import scala.collection.mutable
 import scala.util.matching.Regex
-import scala.util.matching.Regex.Match
 
-
-case class TokenDescr(regex: Regex, constr: AtomConstr)
-
-@FunctionalInterface
-trait AtomConstr:
-  def apply(s: String): Term
 
 class Tokenizer:
-  private val tokens: mutable.ListBuffer[TokenDescr] = mutable.ListBuffer.empty
+  private val tokens: mutable.ListBuffer[PartialFunction[String, Term]] = mutable.ListBuffer.empty
 
-  def registerToken(regex: Regex, constr: String => Term): Unit =
-    tokens += TokenDescr(regex, constr(_))
+  def registerToken(constr: PartialFunction[String, Term]): Unit =
+    tokens.prepend(constr)
 
-  def findToken(token: String): Option[AtomConstr] =
-    tokens.reverseIterator.find(_.regex.findFirstMatchIn(token) match
-      case Some(m) => m.start == 0 && m.end == token.length
-      case None => false
-    ).map(_.constr)
+  def translateToken(token: String): Option[Term] =
+    tokens.find(_.isDefinedAt(token)).map(_(token))
+
+object Tokenizer:
+  val FormalMeTTa: Tokenizer = {
+    val t = Tokenizer()
+
+    t.registerToken{ case "transform" => transform }
+    t.registerToken{ case "=" => === }
+    t.registerToken{ case "addAtom" => addAtom }
+    t.registerToken{ case "remAtom" => remAtom }
+
+    t.registerToken{ case "*" => Mul }
+    t.registerToken{ case d if d.toDoubleOption.isDefined => DoubleLiteral(d.toDouble) }
+    t.registerToken{ case d if d.toLongOption.isDefined => LongLiteral(d.toLong) }
+    t.registerToken{ case d if d.toBooleanOption.isDefined => BoolLiteral(d.toBoolean) }
+    t.registerToken{ case d if d.head == '"' && d.last == '"' && d.length > 1 => StringLiteral(d.init.tail) }
+
+    t
+  }
 
 
 class SExprParser(text: String):
@@ -47,7 +55,7 @@ class SExprParser(text: String):
           throw IllegalStateException("Unexpected right bracket")
 
         case _ =>
-          return parseAtom(tokenizer)
+          return Some(parseAtom(tokenizer))
     end while
     None
 
@@ -55,11 +63,9 @@ class SExprParser(text: String):
     while it.hasNext && it.head != '\n' do
       it.next()
 
-  private def parseAtom(tokenizer: Tokenizer): Option[Term] =
+  private def parseAtom(tokenizer: Tokenizer): Term =
     val token = it.nextToken()
-    tokenizer.findToken(token) match
-      case Some(constr) => Some(constr(token))
-      case None => Some(Symbol(token))
+    tokenizer.translateToken(token).getOrElse(Symbol(token))
 
   private def parseExpr(tokenizer: Tokenizer): Term =
     val children = mutable.ListBuffer.empty[Term]

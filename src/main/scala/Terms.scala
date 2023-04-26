@@ -32,4 +32,3 @@ case class BoolLiteral(value: Boolean) extends Ground
 case class DoubleLiteral(value: Double) extends Ground
 case class LongLiteral(value: Long) extends Ground
 case class StringLiteral(value: String) extends Ground
-case class URILiteral(value: URI) extends Ground

@@ -2,8 +2,7 @@ import munit.FunSuite
 
 
 class ParserTest extends FunSuite:
-  def parseAtoms(program: String): List[Term] =
-    val tokenizer = Tokenizer()
+  def parseAtoms(program: String, tokenizer: Tokenizer = Tokenizer()): List[Term] =
     val parser = SExprParser(program)
     var result = List.empty[Term]
     var break = false
@@ -27,7 +26,7 @@ class ParserTest extends FunSuite:
 
   test("test_text_recognize_full_token") {
     val tokenizer = Tokenizer()
-    tokenizer.registerToken(raw"b".r, _ => Symbol("b"))
+    tokenizer.registerToken{ case "b" => Symbol("Test") }
 
     val parser = SExprParser("ab")
 
@@ -37,7 +36,7 @@ class ParserTest extends FunSuite:
 
   test("test_text_gnd") {
     val tokenizer = Tokenizer()
-    tokenizer.registerToken(raw"\d+".r, token => LongLiteral(token.toLong))
+    tokenizer.registerToken{ case l if l.toLongOption.isDefined => LongLiteral(l.toLong) }
 
     val parser = SExprParser("(3d 42)")
 
@@ -100,9 +99,40 @@ class ParserTest extends FunSuite:
 
   test("override_token_definition") {
     val tokenizer = Tokenizer()
-    tokenizer.registerToken(raw"A".r, _ => Symbol("A"))
-    assertEquals(tokenizer.findToken("A").get("A"), Symbol("A"))
-    tokenizer.registerToken(raw"A".r, _ => Symbol("B"))
-    assertEquals(tokenizer.findToken("A").get("A"), Symbol("B"))
+    tokenizer.registerToken{ case "A" => Symbol("A") }
+    assertEquals(tokenizer.translateToken("A").get, Symbol("A"))
+    tokenizer.registerToken{ case "A" => Symbol("B") }
+    assertEquals(tokenizer.translateToken("A").get, Symbol("B"))
+  }
+
+  test("full") {
+    val tokenizer = Tokenizer.FormalMeTTa
+    val program =
+      """
+        |(= (TV $x)
+        |   (transform
+        |     (.tv (Implication $y $x)
+        |          (stv $s $c))
+        |     (stv (* $s (s-tv (TV $y)))
+        |          (* $c (c-tv (TV $y))))
+        |   )
+        |)
+        |
+        |(.tv (Evaluation (Predicate P) (Concept A))
+        |     (stv 0.5 0.8))
+        |""".stripMargin
+
+    assertEquals(parseAtoms(program, tokenizer),
+      Expr(===, Expr(Symbol("TV"), Var("x")),
+        Expr(transform,
+          Expr(Symbol(".tv"), Expr(Symbol("Implication"), Var("y"), Var("x")),
+            Expr(Symbol("stv"), Var("s"), Var("c"))),
+          Expr(Symbol("stv"), Expr(Mul, Var("s"), Expr(Symbol("s-tv"), Expr(Symbol("TV"), Var("y")))),
+            Expr(Mul, Var("c"), Expr(Symbol("c-tv"), Expr(Symbol("TV"), Var("y")))))
+        )
+      )::
+      Expr(Symbol(".tv"), Expr(Symbol("Evaluation"), Expr(Symbol("Predicate"), Symbol("P")), Expr(Symbol("Concept"), Symbol("A"))),
+        Expr(Symbol("stv"), DoubleLiteral(0.5), DoubleLiteral(0.8)))::Nil)
+
   }
 end ParserTest
