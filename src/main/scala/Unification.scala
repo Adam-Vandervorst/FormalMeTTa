@@ -19,7 +19,7 @@ case class Knowledge(map: Map[String, Term]):
   private def walk(t: Term): Option[Term] = t match
     case Expr(ts) => Some(Expr(ts.map(x => walk(x).getOrElse(x))))
     case Var(s) => lookup(s)
-    case t: (Builtin | Ground) => Some(t)
+    case t: (Builtin | Ground | Symbol) => Some(t)
 
 object Knowledge:
   def empty: Knowledge = Knowledge(Map.empty[String, Term])
@@ -44,7 +44,7 @@ object Unification:
       bind(i, t2, knowledge)
     case (_, Var(j)) =>
       bind(j, t1, knowledge)
-    case (i: (Builtin | Ground), j: (Builtin | Ground)) =>
+    case (i: (Builtin | Ground | Symbol), j: (Builtin | Ground | Symbol)) =>
       if i == j then Some(knowledge)
       else None
     case (Expr(ls), Expr(rs)) if ls.length == rs.length =>

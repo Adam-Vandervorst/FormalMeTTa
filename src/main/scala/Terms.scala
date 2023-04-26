@@ -18,6 +18,8 @@ sealed trait Atom extends Term
 
 case class Var(name: String) extends Atom
 
+case class Symbol(name: String) extends Atom
+
 sealed trait Builtin extends Atom
 case object transform extends Builtin
 case object === extends Builtin

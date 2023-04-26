@@ -28,8 +28,8 @@ def execute(initial: State, rules: Iterable[RewriteRule]): State =
 def executeWithContext(initial: State, contextRules: State => Iterable[RewriteRule]): State =
   var state = initial
   while true do
-    println()
-    println(state.overview)
+//    println()
+//    println(state.overview)
     contextRules(state).find(_.isDefinedAt(state)) match
       case Some(rule) => state = rule(state)
       case None => return state
@@ -59,6 +59,7 @@ extension (t: Term)
   def pretty: String = t match
     case Expr(ts) => ts.map(_.pretty).mkString("(", " ", ")")
     case Var(name) => s"$$$name"
+    case Symbol(name) => name
 
     case `transform` => "transform"
     case `===` => "="
