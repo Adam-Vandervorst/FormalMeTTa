@@ -19,12 +19,12 @@ class QueryTest extends FunSuite:
     )
 
 
-    assert(QUERY.isDefinedAt(state1))
-    assert(QUERY(state1) == state1_output_option1)
+    assert(QueryRule.isDefinedAt(state1))
+    assert(QueryRule(state1) == state1_output_option1)
   }
 
   test("context") {
-    val QUERY = Query(TContext(Expr(StringLiteral("Wrapper"), TContext.HOLE)))
+    val QUERY = QueryKRule(TContext(Expr(StringLiteral("Wrapper"), TContext.HOLE)))
 
     val state1 = State(
       Space(StringLiteral("Input invariant 1"), Expr(StringLiteral("Wrapper"), Expr(StringLiteral("Some"), StringLiteral("To process 1")))),
@@ -65,8 +65,8 @@ class ChainTest extends FunSuite:
     )
 
 
-    assert(CHAIN.isDefinedAt(state1))
-    assert(CHAIN(state1) == state1_output_option1)
+    assert(ChainRule.isDefinedAt(state1))
+    assert(ChainRule(state1) == state1_output_option1)
   }
 
   test("auto redundant context") {
@@ -85,7 +85,7 @@ class ChainTest extends FunSuite:
     )
 
     for K <- state1.w.possibleContexts
-        state <- Chain(K).unapply(state1) do
+        state <- ChainKRule(K).unapply(state1) do
       assert(state == state1_output_option1)
   }
 end ChainTest
@@ -107,8 +107,8 @@ class TransformTest extends FunSuite:
       state1.o
     )
 
-    assert(TRANSFORM.isDefinedAt(state1))
-    assert(TRANSFORM(state1) == state1_output_option1)
+    assert(TransformRule.isDefinedAt(state1))
+    assert(TransformRule(state1) == state1_output_option1)
   }
 end TransformTest
 
@@ -136,8 +136,8 @@ class OutputTest extends FunSuite:
       Space(StringLiteral("Output invariant 1"), Expr(StringLiteral("Some"), StringLiteral("Output invariant 2")), Expr(StringLiteral("Some"), StringLiteral("To output option 2"))),
     )
 
-    assert(OUTPUT.isDefinedAt(state1))
-    assert(OUTPUT(state1) == state1_output_option1 || OUTPUT(state1) == state1_output_option2)
+    assert(OutputRule.isDefinedAt(state1))
+    assert(OutputRule(state1) == state1_output_option1 || OutputRule(state1) == state1_output_option2)
   }
 
   test("simple neg") {
@@ -148,6 +148,6 @@ class OutputTest extends FunSuite:
       Space(StringLiteral("Output invariant 1"), Expr(StringLiteral("Some"), StringLiteral("Output invariant 2"))),
     )
 
-    assert(!OUTPUT.isDefinedAt(state1))
+    assert(!OutputRule.isDefinedAt(state1))
   }
 end OutputTest

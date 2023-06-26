@@ -19,8 +19,8 @@ class BoolTest extends FunSuite:
     )
 
 
-    assert(BOOLMUL1.isDefinedAt(state1))
-    assert(BOOLMUL1(state1) == state1_output_option1)
+    assert(BoolMul1Rule.isDefinedAt(state1))
+    assert(BoolMul1Rule(state1) == state1_output_option1)
   }
 
   test("simple pos 2") {
@@ -39,8 +39,8 @@ class BoolTest extends FunSuite:
     )
 
 
-    assert(BOOLMUL2.isDefinedAt(state1))
-    assert(BOOLMUL2(state1) == state1_output_option1)
+    assert(BoolMul2Rule.isDefinedAt(state1))
+    assert(BoolMul2Rule(state1) == state1_output_option1)
   }
 end BoolTest
 
@@ -62,8 +62,8 @@ class DoubleTest extends FunSuite:
     )
 
 
-    assert(DOUBLEMUL1.isDefinedAt(state1))
-    assert(DOUBLEMUL1(state1) == state1_output_option1)
+    assert(DoubleMul1Rule.isDefinedAt(state1))
+    assert(DoubleMul1Rule(state1) == state1_output_option1)
   }
 
   test("simple pos 2") {
@@ -82,7 +82,7 @@ class DoubleTest extends FunSuite:
     )
 
 
-    assert(DOUBLEMUL2.isDefinedAt(state1))
-    assert(DOUBLEMUL2(state1) == state1_output_option1)
+    assert(DoubleMul2Rule.isDefinedAt(state1))
+    assert(DoubleMul2Rule(state1) == state1_output_option1)
   }
 end DoubleTest

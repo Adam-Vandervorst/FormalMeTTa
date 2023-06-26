@@ -3,7 +3,7 @@ case class State(i: Space, k: Space, w: Space, o: Space)
 trait RewriteRule extends PartialFunction[State, State]
 
 
-case object QUERY extends RewriteRule:
+case object QueryRule extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // sigma_i = unify(t', t_i)
     // k = S(L(===, t_1, u_1), ..., L(===, t_n, u_n)) ++ k'
@@ -24,7 +24,7 @@ case object QUERY extends RewriteRule:
     State(i_, k, applied ++ w, o)
 
 
-case object CHAIN extends RewriteRule:
+case object ChainRule extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // sigma_i = unify(u, t_i)
     // k = S(L(===, t_1, u_1), ..., L(===, t_n, u_n)) ++ k'
@@ -46,7 +46,7 @@ case object CHAIN extends RewriteRule:
     State(i, k, applied ++ w_, o)
 
 
-case object TRANSFORM extends RewriteRule:
+case object TransformRule extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // sigma_i = unify(t, t_i)
     // k = S(t1, ..., tn) ++ k'
@@ -76,7 +76,7 @@ case object TRANSFORM extends RewriteRule:
     State(i_, k, applied ++ w, o)
 
 
-case object ADDATOM1 extends RewriteRule:
+case object AddAtom1Rule extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // -
     val State(i, k, w, o) = x
@@ -97,7 +97,7 @@ case object ADDATOM1 extends RewriteRule:
     State(i_, k, Space(t) ++ w, Space(??? : Term) ++ o)
 
 
-case object BOOLMUL1 extends RewriteRule:
+case object BoolMul1Rule extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // -
     val State(i, k, w, o) = x
@@ -118,7 +118,7 @@ case object BOOLMUL1 extends RewriteRule:
     State(i_, k, w, Space(BoolLiteral(b1 & b2)) ++ o)
 
 
-case object BOOLMUL2 extends RewriteRule:
+case object BoolMul2Rule extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // w = {(Mul b1 b2)} ++ w'
     val State(i, k, w, o) = x
@@ -139,7 +139,7 @@ case object BOOLMUL2 extends RewriteRule:
     State(i, k, w_, Space(BoolLiteral(b1 & b2)) ++ o)
 
 
-case object DOUBLEMUL1 extends RewriteRule:
+case object DoubleMul1Rule extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // -
     val State(i, k, w, o) = x
@@ -160,7 +160,7 @@ case object DOUBLEMUL1 extends RewriteRule:
     State(i_, k, w, Space(DoubleLiteral(d1 * d2)) ++ o)
 
 
-case object DOUBLEMUL2 extends RewriteRule:
+case object DoubleMul2Rule extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // w = {(Mul b1 b2)} ++ w'
     val State(i, k, w, o) = x
@@ -181,7 +181,7 @@ case object DOUBLEMUL2 extends RewriteRule:
     State(i, k, w_, Space(DoubleLiteral(d1 * d2)) ++ o)
 
 
-case object OUTPUT extends RewriteRule:
+case object OutputRule extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // insensitive(u, k)
     val State(i, k, w, o) = x
@@ -196,23 +196,23 @@ case object OUTPUT extends RewriteRule:
     State(i, k, w_, Space(u) ++ o)
 
 
-val BASE: Seq[RewriteRule] = Seq(
-  QUERY,
-  CHAIN,
-  TRANSFORM,
-  OUTPUT,
+val baseRules: Seq[RewriteRule] = Seq(
+  QueryRule,
+  ChainRule,
+  TransformRule,
+  OutputRule,
 )
 
-val CONTEXT_FREE: Seq[RewriteRule] = Seq(
-  TRANSFORM,
-  OUTPUT
+val contextFreeRules: Seq[RewriteRule] = Seq(
+  TransformRule,
+  OutputRule
 )
 
-val GROUNDING: Seq[RewriteRule] = Seq(
-  BOOLMUL1,
-  BOOLMUL2,
-  DOUBLEMUL1,
-  DOUBLEMUL2,
+val groundingRules: Seq[RewriteRule] = Seq(
+  BoolMul1Rule,
+  BoolMul2Rule,
+  DoubleMul1Rule,
+  DoubleMul2Rule,
 )
 
-val ALL: Seq[RewriteRule] = BASE ++ GROUNDING
+val allRules: Seq[RewriteRule] = baseRules ++ groundingRules

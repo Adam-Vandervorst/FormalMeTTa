@@ -23,7 +23,7 @@ class Nats extends FunSuite:
       Space(Expr.nest(S, S, S, S, Z))
     )
 
-     assert(execute(initial, ALL) == resulting)
+     assert(execute(initial, allRules) == resulting)
   }
 
 
@@ -49,7 +49,7 @@ class FrogUnification extends FunSuite:
       Space(StringLiteral("Fritz"))
     )
 
-    assertEquals(executeWithContext(initial, ALL_IN_CONTEXT), resulting)
+    assertEquals(executeWithContext(initial, allInContext), resulting)
   }
 
 
@@ -78,5 +78,5 @@ class Socrates extends FunSuite:
       Space(Expr(TV, DoubleLiteral(0.9 * 0.7)))
     )
 
-    assertEquals(executeWithContext(initial, ALL_IN_CONTEXT), resulting)
+    assertEquals(executeWithContext(initial, allInContext), resulting)
   }

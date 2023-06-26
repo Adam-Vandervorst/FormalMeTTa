@@ -14,7 +14,7 @@ object TContext:
   val HOLE: Var = Var("HOLE")
 
 
-case class Query(K: Context) extends RewriteRule:
+case class QueryKRule(K: Context) extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     val State(i, k, w, o) = x
     i.ts.exists{ case K(t_) => !insensitive(t_, k); case _ => false }
@@ -31,7 +31,7 @@ case class Query(K: Context) extends RewriteRule:
     State(i_, k, applied ++ w, o)
 
 
-case class Chain(K: Context) extends RewriteRule:
+case class ChainKRule(K: Context) extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     val State(i, k, w, o) = x
     w.ts.exists{ case K(u) => !insensitive(u, k); case _ => false }
@@ -49,7 +49,7 @@ case class Chain(K: Context) extends RewriteRule:
     State(i, k, applied ++ w_, o)
 
 
-case class DoubleMul2(K: Context) extends RewriteRule:
+case class DoubleMul2KRule(K: Context) extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     val State(i, k, w, o) = x
     w.ts.exists {
@@ -67,12 +67,12 @@ case class DoubleMul2(K: Context) extends RewriteRule:
     State(i, k, w_, Space(K(DoubleLiteral(d1 * d2))) ++ o)
 
 
-def ALL_IN_CONTEXT(state: State): Iterable[RewriteRule] =
-  state.i.possibleContexts.map(Query).toVector ++
-  state.w.possibleContexts.map(Chain).toVector ++
-  state.w.possibleContexts.map(DoubleMul2).toVector ++
-  GROUNDING ++
-  CONTEXT_FREE
+def allInContext(state: State): Iterable[RewriteRule] =
+  state.i.possibleContexts.map(QueryKRule).toVector ++
+  state.w.possibleContexts.map(ChainKRule).toVector ++
+  state.w.possibleContexts.map(DoubleMul2KRule).toVector ++
+  groundingRules ++
+  contextFreeRules
 
 /*
 case object TRANSFORM extends RewriteRule:
