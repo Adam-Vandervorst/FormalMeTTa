@@ -80,3 +80,36 @@ class Socrates extends FunSuite:
 
     assertEquals(executeWithContext(initial, allInContext), resulting)
   }
+
+class VitalyEq extends FunSuite:
+  test("basic") {
+    val ite = StringLiteral("if")
+    val eq = StringLiteral("make-eq")
+    val set = StringLiteral("set-value")
+    val empty = StringLiteral("empty")
+
+    val initial = State(
+      Space(
+        Expr(ite, Expr(eq, Var("x"), Var("y")),
+          Expr(ite, Expr(set, Var("x")),
+            Var("y"),
+            empty
+          ),
+          empty
+        )
+      ),
+      Space(
+        Expr(===, Expr(eq, Var("a"), Var("a")), BoolLiteral(true)),
+
+        Expr(===, Expr(ite, BoolLiteral(true), Var("tt"), Var("tf")), Var("tt")),
+        Expr(===, Expr(ite, BoolLiteral(false), Var("ft"), Var("ff")), Var("ff")),
+
+        Expr(===, Expr(set, LongLiteral(1)), BoolLiteral(true)),
+        Expr(===, Expr(set, LongLiteral(2)), BoolLiteral(true)),
+      ),
+      Space(),
+      Space()
+    )
+
+    assert(executeWithContext(initial, allInContext).o == Space(LongLiteral(1), LongLiteral(2)))
+  }
