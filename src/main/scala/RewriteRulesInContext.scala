@@ -4,6 +4,8 @@ abstract class Context:
 
 
 case class TContext(lens: Term) extends Context:
+  override def toString(): String = f"@ ${lens.pretty}"
+
   override def apply(t: Term): Term =
     substitute(lens, Knowledge.empty.modBind("HOLE", t))
 
@@ -15,6 +17,8 @@ object TContext:
 
 
 case class QueryKRule(K: Context) extends RewriteRule:
+  override def toString(): String = f"Query $K"
+
   def isDefinedAt(x: State): Boolean =
     val State(i, k, w, o) = x
     i.ts.exists{ case K(t_) => !insensitive(t_, k); case _ => false }
@@ -32,6 +36,8 @@ case class QueryKRule(K: Context) extends RewriteRule:
 
 
 case class ChainKRule(K: Context) extends RewriteRule:
+  override def toString(): String = f"Chain $K"
+
   def isDefinedAt(x: State): Boolean =
     val State(i, k, w, o) = x
     w.ts.exists{ case K(u) => !insensitive(u, k); case _ => false }
@@ -50,6 +56,8 @@ case class ChainKRule(K: Context) extends RewriteRule:
 
 
 case class DoubleMul2KRule(K: Context) extends RewriteRule:
+  override def toString(): String = f"DoubleMul $K"
+
   def isDefinedAt(x: State): Boolean =
     val State(i, k, w, o) = x
     w.ts.exists {

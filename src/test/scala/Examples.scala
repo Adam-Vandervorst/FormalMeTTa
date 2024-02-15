@@ -110,6 +110,7 @@ class VitalyEq extends FunSuite:
       Space(),
       Space()
     )
-
+    
+    println("reduction")
     assert(executeWithContext(initial, allInContext).o == Space(LongLiteral(1), LongLiteral(2)))
   }

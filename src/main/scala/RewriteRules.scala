@@ -4,6 +4,8 @@ trait RewriteRule extends PartialFunction[State, State]
 
 
 case object QueryRule extends RewriteRule:
+  override def toString(): String = f"Query"
+
   def isDefinedAt(x: State): Boolean =
     // sigma_i = unify(t', t_i)
     // k = S(L(===, t_1, u_1), ..., L(===, t_n, u_n)) ++ k'
@@ -25,6 +27,8 @@ case object QueryRule extends RewriteRule:
 
 
 case object ChainRule extends RewriteRule:
+  override def toString(): String = f"Chain"
+
   def isDefinedAt(x: State): Boolean =
     // sigma_i = unify(u, t_i)
     // k = S(L(===, t_1, u_1), ..., L(===, t_n, u_n)) ++ k'
@@ -47,6 +51,8 @@ case object ChainRule extends RewriteRule:
 
 
 case object TransformRule extends RewriteRule:
+  override def toString(): String = f"Transform"
+
   def isDefinedAt(x: State): Boolean =
     // sigma_i = unify(t, t_i)
     // k = S(t1, ..., tn) ++ k'
@@ -77,6 +83,8 @@ case object TransformRule extends RewriteRule:
 
 
 case object AddAtom1Rule extends RewriteRule:
+  override def toString(): String = f"AddAtom1Rule"
+
   def isDefinedAt(x: State): Boolean =
     // -
     val State(i, k, w, o) = x
@@ -98,6 +106,8 @@ case object AddAtom1Rule extends RewriteRule:
 
 
 case object BoolMul1Rule extends RewriteRule:
+  override def toString(): String = f"BoolMul1"
+
   def isDefinedAt(x: State): Boolean =
     // -
     val State(i, k, w, o) = x
@@ -119,6 +129,8 @@ case object BoolMul1Rule extends RewriteRule:
 
 
 case object BoolMul2Rule extends RewriteRule:
+  override def toString(): String = f"BoolMul2"
+  
   def isDefinedAt(x: State): Boolean =
     // w = {(Mul b1 b2)} ++ w'
     val State(i, k, w, o) = x
@@ -140,6 +152,8 @@ case object BoolMul2Rule extends RewriteRule:
 
 
 case object DoubleMul1Rule extends RewriteRule:
+  override def toString(): String = f"DoubleMul1"
+
   def isDefinedAt(x: State): Boolean =
     // -
     val State(i, k, w, o) = x
@@ -161,6 +175,8 @@ case object DoubleMul1Rule extends RewriteRule:
 
 
 case object DoubleMul2Rule extends RewriteRule:
+  override def toString(): String = f"DoubleMul2"
+
   def isDefinedAt(x: State): Boolean =
     // w = {(Mul b1 b2)} ++ w'
     val State(i, k, w, o) = x
@@ -182,6 +198,8 @@ case object DoubleMul2Rule extends RewriteRule:
 
 
 case object OutputRule extends RewriteRule:
+  override def toString(): String = f"Output"
+
   def isDefinedAt(x: State): Boolean =
     // insensitive(u, k)
     val State(i, k, w, o) = x

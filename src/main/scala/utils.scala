@@ -25,15 +25,22 @@ def execute(initial: State, rules: Iterable[RewriteRule]): State =
       case None => return state
   throw IllegalStateException()
 
-def executeWithContext(initial: State, contextRules: State => Iterable[RewriteRule]): State =
+def executeWithContext(initial: State, contextRules: State => Iterable[RewriteRule], debug: Boolean = false, limit: Long = 10000): State =
   var state = initial
-  while true do
-//    println()
-//    println(state.overview)
+  if debug then
+    println("initial state")
+    println(state.overview)
+  var i = 1
+  while i < limit do
     contextRules(state).find(_.isDefinedAt(state)) match
-      case Some(rule) => state = rule(state)
+      case Some(rule) => 
+        state = rule(state)
+        if debug then
+          println(f"--> $rule")
+          println(state.overview)
+        i += 1
       case None => return state
-  throw IllegalStateException()
+  throw RuntimeException(f"Reached $limit Rule Applications")
 
 extension (s: Space)
   def ++ (os: Space): Space = Space(s.ts concat os.ts)
