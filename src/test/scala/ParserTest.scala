@@ -2,26 +2,16 @@ import munit.FunSuite
 
 
 class ParserTest extends FunSuite:
-  def parseAtoms(program: String, tokenizer: Tokenizer = Tokenizer()): List[Term] =
-    val parser = SExprParser(program)
-    var result = List.empty[Term]
-    var break = false
-    while !break do
-      parser.parse(tokenizer) match
-        case Some(value) => result = result :+ value
-        case None => break = true
-    result
-
   test("test_text_var") {
-    assertEquals(parseAtoms("$n"), List(Var("n")))
+    assertEquals(parseAtoms("$n", Tokenizer()), List(Var("n")))
   }
 
   test("test_text_sym") {
-    assertEquals(parseAtoms("test"), List(Symbol("test")))
+    assertEquals(parseAtoms("test", Tokenizer()), List(Symbol("test")))
   }
 
   test("test_text_quoted_string") {
-    assertEquals(parseAtoms("\"te st\""), List(Symbol("\"te st\"")))
+    assertEquals(parseAtoms("\"te st\"", Tokenizer()), List(Symbol("\"te st\"")))
   }
 
   test("test_text_recognize_full_token") {
@@ -46,13 +36,13 @@ class ParserTest extends FunSuite:
 
   test("test_text_expr") {
     assertEquals(
-      parseAtoms("(= (fac $n) (* $n (fac (- $n 1))))"),
+      parseAtoms("(= (fac $n) (* $n (fac (- $n 1))))", Tokenizer()),
       List(Expr(Symbol("="), Expr(Symbol("fac"), Var("n")), Expr(Symbol("*"), Var("n"), Expr(Symbol("fac"), Expr(Symbol("-"), Var("n"), Symbol("1"))))))
     )
   }
 
   test("test_text_few_expr") {
-    assertEquals(parseAtoms("(a) (b)"), List(Expr(Symbol("a")), Expr(Symbol("b"))))
+    assertEquals(parseAtoms("(a) (b)", Tokenizer()), List(Expr(Symbol("a")), Expr(Symbol("b"))))
   }
 
   test("test_next_token") {
@@ -72,21 +62,21 @@ class ParserTest extends FunSuite:
   test("test_comment_base") {
     val program = ";(a 4)\n      (b 5)"
     val expected = List(Expr(Symbol("b"), Symbol("5")))
-    val res = parseAtoms(program)
+    val res = parseAtoms(program, Tokenizer())
     assertEquals(res, expected)
   }
 
   test("test_comment_in_sexpr") {
     val program = " (a ; 4)\n    5)"
     val expected = List(Expr(Symbol("a"), Symbol("5")))
-    val res = parseAtoms(program)
+    val res = parseAtoms(program, Tokenizer())
     assertEquals(res, expected)
   }
 
   test("test_comment_endl") {
     val program = " (a 4);\n      (b 5)"
     val expected = List(Expr(Symbol("a"), Symbol("4")), Expr(Symbol("b"), Symbol("5")))
-    val res = parseAtoms(program)
+    val res = parseAtoms(program, Tokenizer())
     assertEquals(res, expected)
   }
 

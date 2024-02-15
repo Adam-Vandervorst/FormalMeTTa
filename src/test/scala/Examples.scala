@@ -114,3 +114,42 @@ class VitalyEq extends FunSuite:
     println("reduction")
     assert(executeWithContext(initial, allInContext).o == Space(LongLiteral(1), LongLiteral(2)))
   }
+
+class StackBased extends FunSuite:
+  test("put") {
+    val initial = State(
+      Space(parseAtoms("(E (put 2))\n((E (put 2)) (put 3))"): _*),
+      Space(parseAtoms("(= ($s (put $x)) ($s $x))"): _*),
+      Space(),
+      Space()
+    )
+
+    assert(executeWithContext(initial, allInContext).o == Space(parseAtoms("(E 2)\n((E 2) 3)"): _*))
+  }
+
+
+  test("apply3 malformed") {
+    val initial = State(
+      Space(parseAtoms("((((E (put 2)) (put 3)) (put (func ($as $ax) ($as (T $ax))))) apply3)"): _*),
+      Space(parseAtoms("(= ($ps (put $px)) ($ps $px))\n(= (($fs (func $fs $fr)) apply3) $fr)"): _*),
+      Space(),
+      Space()
+    )
+
+//    println(executeWithContext(initial, allInContext).overview)
+  }
+
+  test("apply") {
+    val initial = State(
+      Space(parseAtoms("(((E 6.0) (Cons dup (Cons mul Nil))) apply)"): _*),
+      Space(parseAtoms(
+        "(= ((($s $x) $y) mul) ($s (* $x $y)))" +
+        "(= (($s $x) dup) (($s $x) $x))" +
+        "(= (($s (Cons $f $r)) apply) ((($s $f) $r) apply))" +
+        "(= (($s Nil) apply) $s)"): _*),
+      Space(),
+      Space()
+    )
+
+    assert(executeWithContext(initial, allInContext).o == Space(Expr(Symbol("E"), DoubleLiteral(36.0))))
+  }

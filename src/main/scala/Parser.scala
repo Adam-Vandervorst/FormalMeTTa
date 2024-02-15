@@ -29,6 +29,15 @@ object Tokenizer:
     t
   }
 
+def parseAtoms(program: String, tokenizer: Tokenizer = Tokenizer.FormalMeTTa): List[Term] =
+  val parser = SExprParser(program)
+  var result = List.empty[Term]
+  var break = false
+  while !break do
+    parser.parse(tokenizer) match
+      case Some(value) => result = result :+ value
+      case None => break = true
+  result
 
 class SExprParser(text: String):
   private val it = text.iterator.buffered
