@@ -11,7 +11,9 @@ case class Knowledge(map: Map[String, Term]):
    * Recursively looks up the value of variable `v` (if any)
    */
   def lookup(v: String): Option[Term] =
-    map.get(v).flatMap(walk)
+    val r = map.get(v)
+    if r.contains(Var(v)) then Some(Var(v))
+    else r.flatMap(walk)
 
   /**
    * If `t` is a var or contains a var look it up recursively.

@@ -15,4 +15,8 @@ class UnificationTest extends FunSuite:
             Expr(StringLiteral("A"), Expr(StringLiteral("B"), Var("w")), Expr(StringLiteral("C"), Var("w"), Expr(StringLiteral("f"), Var("x"), Var("y")))))
       .contains(Knowledge(Map("v" -> Expr(StringLiteral("f"), Var("x"), Var("y")), "u" -> Var("w")))))
   }
+
+  test("subst") {
+    assert(Knowledge.empty.modBind("HOLE", Var("y")).modBind("y", Var("y")).lookup("HOLE") == Some(Var("y")))
+  }
 end UnificationTest

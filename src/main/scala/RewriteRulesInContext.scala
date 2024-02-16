@@ -7,7 +7,10 @@ case class TContext(lens: Term) extends Context:
   override def toString(): String = f"@ ${lens.pretty}"
 
   override def apply(t: Term): Term =
-    substitute(lens, Knowledge.empty.modBind("HOLE", t))
+    val k = t match
+      case Var(n) => Knowledge.empty.modBind(n, t)
+      case _ => Knowledge.empty
+    substitute(lens, k.modBind("HOLE", t))
 
   override def unapply(t: Term): Option[Term] =
     Unification.unify(lens)(t).flatMap(_.lookup("HOLE"))

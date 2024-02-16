@@ -111,8 +111,31 @@ class VitalyEq extends FunSuite:
       Space()
     )
     
-    println("reduction")
     assert(executeWithContext(initial, allInContext).o == Space(LongLiteral(1), LongLiteral(2)))
+  }
+
+class NilLambda extends FunSuite:
+  test("small") {
+
+    val initial = State(
+      Space(parseAtoms("(($l $lx) $ly)"): _*),
+      Space(parseAtoms("(= (((λ $x) $x) $y) $y)"): _*),
+      Space(),
+      Space()
+    )
+
+    assert(executeWithContext(initial, allInContext) == initial)
+  }
+
+  test("larger") {
+    val initial = State(
+      Space(parseAtoms("((λ $f) (($f $z) $g))"): _*),
+      Space(parseAtoms("(= (((λ $x) $x) $y) $y)"): _*),
+      Space(),
+      Space()
+    )
+
+    assert(executeWithContext(initial, allInContext) == initial)
   }
 
 class StackBased extends FunSuite:
