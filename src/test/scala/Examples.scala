@@ -176,3 +176,32 @@ class StackBased extends FunSuite:
 
     assert(executeWithContext(initial, allInContext).o == Space(Expr(Symbol("E"), DoubleLiteral(36.0))))
   }
+
+class AuntKG extends FunSuite:
+  test("github simple") {
+
+    val kb = Space(parseAtoms("(parent Tom Bob)\n(parent Pam Bob)\n(parent Tom Liz)\n(parent Bob Ann)\n(parent Bob Pat)\n(parent Pat Jim)\n(female Pam)\n(male Tom)\n(male Bob)\n(female Liz)\n(female Pat)\n(female Ann)\n(male Jim)"): _*)
+
+    val bob_parents = State(Space(parseAtoms("(transform (parent $p Bob) $p)"): _*), kb, Space(), Space())
+
+    assert(executeWithContext(bob_parents, allInContext).o == Space(Symbol("Pam"), Symbol("Tom")))
+
+    val bob_mother = State(Space(parseAtoms("(transform (parent $x Bob) (transform (female $x) $x))"): _*), kb, Space(), Space())
+
+    assert(executeWithContext(bob_mother, allInContext).o == Space(Symbol("Pam")))
+
+    val ann_sister = State(Space(parseAtoms("(transform (parent $x Ann) (transform (parent $x $y) (transform (female $y) $y)))"): _*), kb, Space(), Space())
+
+    assert(executeWithContext(ann_sister, allInContext).o == Space(Symbol("Pat"), Symbol("Ann")))
+    // Ann could be filtered by difference or by set intersection
+
+    val jim_aunt = State(Space(parseAtoms("(transform (parent $p Jim) (transform (parent $gp $p) (transform (parent $gp $q) (transform (female $q) $q))))"): _*), kb, Space(), Space())
+
+    assert(executeWithContext(jim_aunt, allInContext).o == Space(Symbol("Pat"), Symbol("Ann")))
+    // Pat could be filtered by difference or by set intersection
+
+    val ann_pred = State(Space(parseAtoms("(pred Ann)"): _*), kb ++ Space(parseAtoms("(= (pred $x1) (transform (parent $p1 $x1) $p1))\n(= (pred $x2) (transform (parent $p2 $x2) (pred $p2)))"): _*), Space(), Space())
+
+    assert(executeWithContext(ann_pred, allInContext).o == Space(Symbol("Tom"), Symbol("Pam"), Symbol("Bob")))
+  }
+

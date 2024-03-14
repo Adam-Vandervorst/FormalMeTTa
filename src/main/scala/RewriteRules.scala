@@ -81,6 +81,37 @@ case object TransformRule extends RewriteRule:
     })
     State(i_, k, applied ++ w, o)
 
+case object TransformWorkingRule extends RewriteRule:
+  override def toString(): String = f"Transform"
+
+  def isDefinedAt(x: State): Boolean =
+    // sigma_i = unify(t, t_i)
+    // k = S(t1, ..., tn) ++ k'
+    // insensitive(t, k')
+    val State(i, k, w, o) = x
+
+    w.ts.exists{
+      case Expr(Vector(`transform`, t, u)) =>
+        k.ts.exists(ti => !disjoint(t, ti))
+      case _ => false
+    }
+
+  def apply(x: State): State =
+    // State({(transform t y)} ++ i, k, w, o) -->
+    // State(i, k, {u_1 sigma_1} ++ ... ++ {u_1 sigma_1} ++ w, o)
+    val State(i, k, w, o) = x
+
+    val (Some(Expr(Vector(_, t, u))), w_) = w.partitionFirst{
+      case Expr(Vector(`transform`, t, u)) =>
+        k.ts.exists(ti => !disjoint(t, ti))
+      case _ => false
+    }
+    val applied = new Space(k.ts.collect {
+      case ti if !disjoint(t, ti) =>
+        substitute(u, (t unify ti).get)
+    })
+    State(i, k, applied ++ w_, o)
+
 
 case object AddAtom1Rule extends RewriteRule:
   override def toString(): String = f"AddAtom1Rule"
@@ -203,7 +234,7 @@ case object OutputRule extends RewriteRule:
   def isDefinedAt(x: State): Boolean =
     // insensitive(u, k)
     val State(i, k, w, o) = x
-    w.ts.exists(u => insensitive(u, k))
+    w.ts.exists(u => insensitive(u, k) && disjoint(u, Expr(transform, Var("_1"), Var("_2"))))
 
   def apply(x: State): State =
     // State(i, k, {u} ++ w, o) -->
@@ -223,6 +254,7 @@ val baseRules: Seq[RewriteRule] = Seq(
 
 val contextFreeRules: Seq[RewriteRule] = Seq(
   TransformRule,
+  TransformWorkingRule,
   OutputRule
 )
 
